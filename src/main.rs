@@ -27,7 +27,7 @@ struct Opt {
 
     /// Password for the IMAP account
     #[structopt(short, long)]
-    password: Option<String>,
+    _password: Option<String>,
 
     /// Path where to store the reports
     #[structopt(parse(from_os_str))]
@@ -41,7 +41,7 @@ struct Attachment {
     name: String,
 }
 
-const USABLE_MIMETYPES: [&'static str; 3] = [
+const USABLE_MIMETYPES: [&str; 3] = [
     "application/zip",
     "application/gzip",
     "application/octet-stream",
@@ -115,13 +115,13 @@ fn decompress_attachment(mut attachment: Attachment) -> Result<Attachment> {
     let mut decompressed: Vec<u8> = Vec::new();
     // TODO: add function that determines type better, e.g. check file extension if mimetype is
     // octect stream
-    if attachment.mimetype == String::from("application/zip") {
+    if attachment.mimetype == *"application/zip" {
         let mut zip = ZipArchive::new(content).unwrap();
         let mut report = zip.by_index(0)?;
         std::io::copy(&mut report, &mut decompressed)?;
         attachment.name = String::from(report.name());
-    } else if attachment.mimetype == String::from("application/gzip")
-        || attachment.mimetype == String::from("application/octet-stream")
+    } else if attachment.mimetype == *"application/gzip"
+        || attachment.mimetype == *"application/octet-stream"
     {
         let mut report = Decoder::new(content).unwrap();
         std::io::copy(&mut report, &mut decompressed)?;
@@ -149,7 +149,7 @@ fn get_attachment(mail: &ParsedMail) -> Result<Attachment> {
             .get("filename")
             .unwrap()
             .clone();
-    } else if mail.subparts.len() > 0 {
+    } else if !mail.subparts.is_empty() {
         for subpart in &mail.subparts {
             content_type = subpart.ctype.mimetype.clone();
             if USABLE_MIMETYPES.contains(&content_type.as_str()) {
@@ -175,7 +175,7 @@ fn get_attachment(mail: &ParsedMail) -> Result<Attachment> {
     Ok(Attachment {
         content: body,
         decompressed: None,
-        name: name,
+        name,
         mimetype: content_type,
     })
 }
