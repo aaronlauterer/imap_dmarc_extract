@@ -10,7 +10,7 @@ edition = "2018"
 [dependencies]
 structopt = { version = "0.3", default-features = false }
 rpassword = "5.0.1"
-imap = "2.3.0"
+imap = "2.4.1"
 native-tls = "0.2.4"
 mailparse = "0.13.0"
 anyhow = "1.0.38"
